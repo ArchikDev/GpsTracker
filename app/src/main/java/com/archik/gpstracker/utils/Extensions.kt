@@ -8,7 +8,7 @@ import com.archik.gpstracker.R
 fun Fragment.openFragment(f: Fragment) {
   (activity as AppCompatActivity).supportFragmentManager
     .beginTransaction()
-    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+    .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     .replace(R.id.containerFrg, f)
     .commit()
 }
@@ -16,7 +16,7 @@ fun Fragment.openFragment(f: Fragment) {
 fun AppCompatActivity.openFragment(f: Fragment) {
   supportFragmentManager
     .beginTransaction()
-    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+    .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     .replace(R.id.containerFrg, f)
     .commit()
 }
