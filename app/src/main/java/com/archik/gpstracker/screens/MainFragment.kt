@@ -1,23 +1,28 @@
 package com.archik.gpstracker.screens
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.archik.gpstracker.R
 import com.archik.gpstracker.databinding.FragmentMainBinding
+import com.archik.gpstracker.utils.checkPermission
+import com.archik.gpstracker.utils.showToast
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
-import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class MainFragment : Fragment() {
 
   private lateinit var binding: FragmentMainBinding
+  private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
@@ -34,7 +39,8 @@ class MainFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    initOsm()
+    registerPermissions()
+    checkLocPermission()
   }
 
   private fun settingsOsm() {
@@ -59,6 +65,48 @@ class MainFragment : Fragment() {
       map.overlays.add(mLocOverlay) // Добавляем наш слой
     }
 
+  }
+
+  private fun registerPermissions() {
+    pLauncher = registerForActivityResult(
+      ActivityResultContracts.RequestMultiplePermissions()) {
+
+      if (it[android.Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+        initOsm()
+      } else {
+        showToast("Вы не дали разрешения на использование местоположения")
+      }
+    }
+  }
+
+  private fun checkLocPermission() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      checkPermissionAfter10()
+    } else {
+      checkPermissionBefore10()
+    }
+  }
+
+  @RequiresApi(Build.VERSION_CODES.Q)
+  private fun checkPermissionAfter10() {
+    if (checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+      && checkPermission(android.Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+    ) {
+      initOsm()
+    } else {
+      pLauncher.launch(arrayOf(
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
+      ))
+    }
+  }
+
+  private fun checkPermissionBefore10() {
+    if (checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+      initOsm()
+    } else {
+      pLauncher.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION))
+    }
   }
 
   companion object {
