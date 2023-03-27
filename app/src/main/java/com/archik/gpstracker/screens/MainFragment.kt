@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.archik.gpstracker.databinding.FragmentMainBinding
+import com.archik.gpstracker.location.LocationService
 import com.archik.gpstracker.utils.DialogManager
 import com.archik.gpstracker.utils.checkPermission
 import com.archik.gpstracker.utils.showToast
@@ -44,6 +45,12 @@ class MainFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
 
     registerPermissions()
+    // Запуск сервиса
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      activity?.startForegroundService(Intent(activity, LocationService::class.java))
+    } else {
+      activity?.startService(Intent(activity, LocationService::class.java))
+    }
   }
 
   override fun onResume() {
