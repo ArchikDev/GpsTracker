@@ -14,20 +14,26 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import com.archik.gpstracker.R
 import com.archik.gpstracker.databinding.FragmentMainBinding
 import com.archik.gpstracker.location.LocationService
 import com.archik.gpstracker.utils.DialogManager
+import com.archik.gpstracker.utils.TimeUtils
 import com.archik.gpstracker.utils.checkPermission
 import com.archik.gpstracker.utils.showToast
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.util.*
 
 class MainFragment : Fragment() {
 
   private var isServiceRunning = true
+  private var timer: Timer? = null
+  private var startTime = 0L
+  private var timeDate = MutableLiveData<String>()
   private lateinit var binding: FragmentMainBinding
   private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 
@@ -49,6 +55,7 @@ class MainFragment : Fragment() {
     registerPermissions()
     setOnClicks()
     checkServiceState()
+    updateTime()
   }
 
   private fun setOnClicks() = with(binding) {
@@ -65,6 +72,30 @@ class MainFragment : Fragment() {
     }
   }
 
+  private fun getCurrentTime(): String {
+    return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
+  }
+
+  private fun updateTime() {
+    timeDate.observe(viewLifecycleOwner) {
+      binding.tvTime.text = it
+    }
+  }
+
+  private fun startTimer() {
+    timer?.cancel()
+
+    timer = Timer()
+    startTime = System.currentTimeMillis()
+    timer?.schedule(object : TimerTask() {
+      override fun run() {
+        activity?.runOnUiThread {
+          timeDate.value = getCurrentTime()
+        }
+      }
+    }, 1, 1)
+  }
+
   private fun startStopService() {
     if (!isServiceRunning) {
       startLocService()
@@ -72,6 +103,8 @@ class MainFragment : Fragment() {
       activity?.stopService(Intent(activity, LocationService::class.java))
 
       binding.fStartStop.setImageResource(R.drawable.ic_play)
+
+      timer?.cancel()
     }
 
     isServiceRunning = !isServiceRunning
@@ -86,6 +119,8 @@ class MainFragment : Fragment() {
     }
 
     binding.fStartStop.setImageResource(R.drawable.ic_stop)
+
+    startTimer()
   }
 
   private fun checkServiceState() {
