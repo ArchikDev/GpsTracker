@@ -12,6 +12,8 @@ import androidx.core.app.NotificationCompat
 import com.archik.gpstracker.MainActivity
 import com.archik.gpstracker.R
 
+// Service - сохраняется даже после закрытия приложения, если его не остановили.
+
 class LocationService: Service() {
   override fun onBind(intent: Intent?): IBinder? {
     return null
@@ -63,5 +65,6 @@ class LocationService: Service() {
   companion object {
     const val CHANNEL_ID = "channel_1"
     var isRunning = false
+    var startTime = 0L
   }
 }
