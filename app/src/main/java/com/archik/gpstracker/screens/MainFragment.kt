@@ -1,7 +1,9 @@
 package com.archik.gpstracker.screens
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -15,8 +17,10 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.archik.gpstracker.R
 import com.archik.gpstracker.databinding.FragmentMainBinding
+import com.archik.gpstracker.location.LocationModel
 import com.archik.gpstracker.location.LocationService
 import com.archik.gpstracker.utils.DialogManager
 import com.archik.gpstracker.utils.TimeUtils
@@ -56,6 +60,7 @@ class MainFragment : Fragment() {
     setOnClicks()
     checkServiceState()
     updateTime()
+    registerLocReceiver()
   }
 
   private fun setOnClicks() = with(binding) {
@@ -223,6 +228,20 @@ class MainFragment : Fragment() {
         }
       )
     }
+  }
+
+  private val receiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+      if (intent?.action == LocationService.LOC_MODEL_INTENT) {
+        val locModel = intent.getSerializableExtra(LocationService.LOC_MODEL_INTENT) as LocationModel
+      }
+    }
+  }
+
+  private fun registerLocReceiver() {
+    val locFilter = IntentFilter(LocationService.LOC_MODEL_INTENT)
+
+    LocalBroadcastManager.getInstance(activity as AppCompatActivity).registerReceiver(receiver, locFilter)
   }
 
   companion object {

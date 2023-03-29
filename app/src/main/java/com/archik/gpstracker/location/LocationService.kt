@@ -13,11 +13,13 @@ import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 import com.archik.gpstracker.MainActivity
 import com.archik.gpstracker.R
 import com.google.android.gms.location.*
 import com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY
+import org.osmdroid.util.GeoPoint
 
 // Service - сохраняется даже после закрытия приложения, если его не остановили.
 
@@ -28,6 +30,7 @@ class LocationService: Service() {
   // Дистанция(сколько прошли)
   private lateinit var locProvider: FusedLocationProviderClient
   private lateinit var locRequest: LocationRequest
+  private lateinit var geoPointsList: ArrayList<GeoPoint>
 
   override fun onBind(intent: Intent?): IBinder? {
     return null
@@ -46,6 +49,8 @@ class LocationService: Service() {
 
   override fun onCreate() {
     super.onCreate()
+
+    geoPointsList = ArrayList()
 
     initLocation()
   }
@@ -103,11 +108,28 @@ class LocationService: Service() {
       if (lastLocation != null && currentLocation != null) {
         if (currentLocation.speed > 0.2) {
           distance += currentLocation.let { lastLocation?.distanceTo(it) } ?: 0.0f
+          geoPointsList.add(GeoPoint(currentLocation.latitude, currentLocation.longitude))
+
+          val locModel = LocationModel(
+            currentLocation.speed,
+            distance,
+            geoPointsList
+          )
+
+          sendLocData(locModel)
         }
       }
 
       lastLocation = currentLocation
     }
+  }
+
+  private fun sendLocData(locModel: LocationModel) {
+    val i = Intent(LOC_MODEL_INTENT)
+
+    i.putExtra(LOC_MODEL_INTENT, locModel)
+
+    LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(i)
   }
 
   // Дистанция(сколько прошли)
@@ -127,6 +149,7 @@ class LocationService: Service() {
 
   companion object {
     const val CHANNEL_ID = "channel_1"
+    const val LOC_MODEL_INTENT = "loc_model_intent"
     var isRunning = false
     var startTime = 0L
   }
