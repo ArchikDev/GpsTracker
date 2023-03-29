@@ -4,11 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +18,6 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.archik.gpstracker.MainViewModel
 import com.archik.gpstracker.R
@@ -31,13 +30,17 @@ import com.archik.gpstracker.utils.checkPermission
 import com.archik.gpstracker.utils.showToast
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.BuildConfig
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.util.*
 
 class MainFragment : Fragment() {
 
+  private var pl: Polyline? = null
   private var isServiceRunning = true
+  private var firstStart = true
   private var timer: Timer? = null
   private var startTime = 0L
   private lateinit var binding: FragmentMainBinding
@@ -90,6 +93,8 @@ class MainFragment : Fragment() {
       tvDistance.text = distance
       tvVelocity.text = velocity
       tvAverage.text = aVelocity
+
+      updatePolyline(it.geoPointsList)
     }
   }
 
@@ -174,6 +179,9 @@ class MainFragment : Fragment() {
   }
 
   private fun initOsm() = with(binding) {
+    pl = Polyline()
+    pl?.outlinePaint?.color = Color.BLUE
+
     map.controller.setZoom(20.0)
 
     val mLocProvider = GpsMyLocationProvider(activity)
@@ -185,6 +193,7 @@ class MainFragment : Fragment() {
     mLocOverlay.runOnFirstFix {
       map.overlays.clear()
       map.overlays.add(mLocOverlay) // Добавляем наш слой
+      map.overlays.add(pl) // Добавляем слой Polyline
     }
 
   }
@@ -264,6 +273,33 @@ class MainFragment : Fragment() {
     val locFilter = IntentFilter(LocationService.LOC_MODEL_INTENT)
 
     LocalBroadcastManager.getInstance(activity as AppCompatActivity).registerReceiver(receiver, locFilter)
+  }
+
+  private fun addPoint(list: List<GeoPoint>) {
+    pl?.addPoint(list[list.size - 1])
+  }
+
+  private fun fillPolyline(list: List<GeoPoint>) {
+    list.forEach {
+      pl?.addPoint(it)
+    }
+  }
+
+  private fun updatePolyline(list: List<GeoPoint>) {
+    if (list.size > 1 && firstStart) {
+      fillPolyline(list)
+      firstStart = false
+    } else {
+      addPoint(list)
+    }
+  }
+
+  // Когда отключается от активити, т.е. закрывается
+  override fun onDetach() {
+    super.onDetach()
+
+    LocalBroadcastManager.getInstance(activity as AppCompatActivity)
+      .unregisterReceiver(receiver)
   }
 
   companion object {
