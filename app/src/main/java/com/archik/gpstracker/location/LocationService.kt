@@ -14,7 +14,6 @@ import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-
 import com.archik.gpstracker.MainActivity
 import com.archik.gpstracker.R
 import com.google.android.gms.location.*
@@ -89,10 +88,10 @@ class LocationService: Service() {
 
   // Дистанция(сколько прошли)
   private fun initLocation() {
-    locRequest = LocationRequest.create()
-    locRequest.interval = 5000
-    locRequest.fastestInterval = 5000
-    locRequest.priority = PRIORITY_HIGH_ACCURACY
+    locRequest = LocationRequest.Builder(PRIORITY_HIGH_ACCURACY, 5000)
+      .setMinUpdateIntervalMillis(5000)
+      .setMaxUpdateDelayMillis(1000)
+      .build()
 
     locProvider = LocationServices.getFusedLocationProviderClient(baseContext)
 
@@ -100,6 +99,7 @@ class LocationService: Service() {
 
   // Дистанция(сколько прошли)
   private val locCallBack = object : LocationCallback() {
+
     override fun onLocationResult(lResult: LocationResult) {
       super.onLocationResult(lResult)
 
@@ -140,11 +140,11 @@ class LocationService: Service() {
       ) != PackageManager.PERMISSION_GRANTED
     ) return
 
+
     locProvider.requestLocationUpdates(
       locRequest,
       locCallBack,
-      Looper.myLooper()
-    )
+      Looper.myLooper())
   }
 
   companion object {

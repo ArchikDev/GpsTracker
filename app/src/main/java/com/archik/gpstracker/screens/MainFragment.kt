@@ -8,6 +8,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,8 +17,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.archik.gpstracker.MainViewModel
 import com.archik.gpstracker.R
 import com.archik.gpstracker.databinding.FragmentMainBinding
 import com.archik.gpstracker.location.LocationModel
@@ -37,9 +40,9 @@ class MainFragment : Fragment() {
   private var isServiceRunning = true
   private var timer: Timer? = null
   private var startTime = 0L
-  private var timeDate = MutableLiveData<String>()
   private lateinit var binding: FragmentMainBinding
   private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
+  private val model: MainViewModel by activityViewModels()
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
@@ -61,6 +64,7 @@ class MainFragment : Fragment() {
     checkServiceState()
     updateTime()
     registerLocReceiver()
+    locationUpdates()
   }
 
   private fun setOnClicks() = with(binding) {
@@ -77,12 +81,22 @@ class MainFragment : Fragment() {
     }
   }
 
+  private fun locationUpdates() = with(binding) {
+    model.locationUpdates.observe(viewLifecycleOwner) {
+      val distance = "Distance: ${String.format("%.1f", it.distance)} m"
+      val velocity = "Velocity: ${String.format("%.1f", 3.6 * it.velocity)} km/h"
+
+      tvDistance.text = distance
+      tvVelocity.text = velocity
+    }
+  }
+
   private fun getCurrentTime(): String {
     return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
   }
 
   private fun updateTime() {
-    timeDate.observe(viewLifecycleOwner) {
+    model.timeDate.observe(viewLifecycleOwner) {
       binding.tvTime.text = it
     }
   }
@@ -95,7 +109,7 @@ class MainFragment : Fragment() {
     timer?.schedule(object : TimerTask() {
       override fun run() {
         activity?.runOnUiThread {
-          timeDate.value = getCurrentTime()
+          model.timeDate.value = getCurrentTime()
         }
       }
     }, 1, 1)
@@ -234,6 +248,8 @@ class MainFragment : Fragment() {
     override fun onReceive(context: Context?, intent: Intent?) {
       if (intent?.action == LocationService.LOC_MODEL_INTENT) {
         val locModel = intent.getSerializableExtra(LocationService.LOC_MODEL_INTENT) as LocationModel
+
+        model.locationUpdates.value = locModel
       }
     }
   }
