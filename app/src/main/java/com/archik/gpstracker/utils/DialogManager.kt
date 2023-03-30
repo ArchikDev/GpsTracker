@@ -2,8 +2,12 @@ package com.archik.gpstracker.utils
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.view.LayoutInflater
 import android.widget.Toast
 import com.archik.gpstracker.R
+import com.archik.gpstracker.databinding.SaveDialogBinding
 
 object DialogManager {
 
@@ -20,6 +24,32 @@ object DialogManager {
       _, _ -> dialog.dismiss()
     }
     dialog.show()
+  }
+
+  fun showSaveDialog(context: Context, listener: Listener) {
+    val builder = AlertDialog.Builder(context)
+    val binding = SaveDialogBinding.inflate(LayoutInflater.from(context), null, false)
+
+    builder.setView(binding.root)
+
+    val dialog = builder.create()
+
+    binding.apply {
+      bSave.setOnClickListener {
+        listener.onClick()
+        dialog.dismiss()
+      }
+
+      bCancel.setOnClickListener {
+        dialog.dismiss()
+      }
+    }
+
+    // Убираем фон у диалог. окна
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+    dialog.show()
+
   }
 
   interface Listener {

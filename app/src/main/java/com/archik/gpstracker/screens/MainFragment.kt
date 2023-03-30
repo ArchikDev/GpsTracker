@@ -135,6 +135,11 @@ class MainFragment : Fragment() {
       binding.fStartStop.setImageResource(R.drawable.ic_play)
 
       timer?.cancel()
+      DialogManager.showSaveDialog(requireContext(), object : DialogManager.Listener {
+        override fun onClick() {
+          showToast("Saved!")
+        }
+      })
     }
 
     isServiceRunning = !isServiceRunning
