@@ -22,6 +22,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.archik.gpstracker.MainViewModel
 import com.archik.gpstracker.R
 import com.archik.gpstracker.databinding.FragmentMainBinding
+import com.archik.gpstracker.db.TrackItem
 import com.archik.gpstracker.location.LocationModel
 import com.archik.gpstracker.location.LocationService
 import com.archik.gpstracker.utils.DialogManager
@@ -38,6 +39,7 @@ import java.util.*
 
 class MainFragment : Fragment() {
 
+  private var locationModel: LocationModel? = null
   private var pl: Polyline? = null
   private var isServiceRunning = true
   private var firstStart = true
@@ -94,6 +96,8 @@ class MainFragment : Fragment() {
       tvVelocity.text = velocity
       tvAverage.text = aVelocity
 
+      locationModel = it
+
       updatePolyline(it.geoPointsList)
     }
   }
@@ -104,6 +108,16 @@ class MainFragment : Fragment() {
 
   private fun getCurrentTime(): String {
     return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
+  }
+
+  private fun geoPointsToString(list: List<GeoPoint>): String {
+    val sb = java.lang.StringBuilder()
+
+    list.forEach {
+      sb.append("${it.latitude}, ${it.longitude}/")
+    }
+
+    return sb.toString()
   }
 
   private fun updateTime() {
@@ -135,14 +149,29 @@ class MainFragment : Fragment() {
       binding.fStartStop.setImageResource(R.drawable.ic_play)
 
       timer?.cancel()
-      DialogManager.showSaveDialog(requireContext(), object : DialogManager.Listener {
-        override fun onClick() {
-          showToast("Saved!")
-        }
+
+      DialogManager.showSaveDialog(requireContext(),
+        getTrackItem(),
+        object : DialogManager.Listener {
+          override fun onClick() {
+            showToast("Saved!")
+          }
       })
     }
 
     isServiceRunning = !isServiceRunning
+  }
+
+  private fun getTrackItem(): TrackItem {
+    return TrackItem(
+      null,
+      getCurrentTime(),
+      TimeUtils.getDate(),
+      String.format("%.1f", locationModel?.distance?.div(1000) ?: 0),
+      getAverageSpeed(locationModel?.distance ?: 0.0f),
+      geoPointsToString(locationModel?.geoPointsList ?: listOf())
+    )
+
   }
 
   private fun startLocService() {
