@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.archik.gpstracker.MainApp
 import com.archik.gpstracker.MainViewModel
 import com.archik.gpstracker.R
 import com.archik.gpstracker.databinding.FragmentMainBinding
@@ -47,7 +48,9 @@ class MainFragment : Fragment() {
   private var startTime = 0L
   private lateinit var binding: FragmentMainBinding
   private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
-  private val model: MainViewModel by activityViewModels()
+  private val model: MainViewModel by activityViewModels {
+    MainViewModel.ViewModelFactory((requireContext().applicationContext as MainApp).database)
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
@@ -70,6 +73,10 @@ class MainFragment : Fragment() {
     updateTime()
     registerLocReceiver()
     locationUpdates()
+
+    model.tracks.observe(viewLifecycleOwner) {
+
+    }
   }
 
   private fun setOnClicks() = with(binding) {
@@ -150,11 +157,14 @@ class MainFragment : Fragment() {
 
       timer?.cancel()
 
+      val track = getTrackItem()
+
       DialogManager.showSaveDialog(requireContext(),
-        getTrackItem(),
+        track,
         object : DialogManager.Listener {
           override fun onClick() {
             showToast("Saved!")
+            model.insertTrack(track)
           }
       })
     }
