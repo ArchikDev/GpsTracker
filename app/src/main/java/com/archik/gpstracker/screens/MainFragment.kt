@@ -73,10 +73,6 @@ class MainFragment : Fragment() {
     updateTime()
     registerLocReceiver()
     locationUpdates()
-
-    model.tracks.observe(viewLifecycleOwner) {
-
-    }
   }
 
   private fun setOnClicks() = with(binding) {
