@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.archik.gpstracker.databinding.ActivityMainBinding
 import com.archik.gpstracker.screens.MainFragment
 import com.archik.gpstracker.screens.SettingsPreferenceFragment
-import com.archik.gpstracker.screens.TrackFragment
+import com.archik.gpstracker.screens.TracksFragment
 import com.archik.gpstracker.utils.openFragment
 
 class MainActivity : AppCompatActivity() {
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
     binding.btnNav.setOnItemSelectedListener {
       when(it.itemId) {
         R.id.id_home -> openFragment(MainFragment.newInstance())
-        R.id.id_tracks -> openFragment(TrackFragment.newInstance())
+        R.id.id_tracks -> openFragment(TracksFragment.newInstance())
         R.id.id_settings -> openFragment(SettingsPreferenceFragment())
       }
       true

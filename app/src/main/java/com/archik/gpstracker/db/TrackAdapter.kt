@@ -18,6 +18,7 @@ class TrackAdapter(private val listener: Listener): ListAdapter<TrackItem, Track
     private var trackTemp: TrackItem? = null
 
     init {
+      binding.cvItemTrack.setOnClickListener(this) // Запустится onClick
       binding.ibDelete.setOnClickListener(this) // Запустится onClick
     }
 
@@ -35,7 +36,12 @@ class TrackAdapter(private val listener: Listener): ListAdapter<TrackItem, Track
     }
 
     override fun onClick(v: View?) {
-      trackTemp?.let { listener.onClick(it) }
+      val type = when(v?.id) {
+        R.id.ibDelete -> ClickType.DELETE
+        R.id.cvItemTrack -> ClickType.OPEN
+        else -> ClickType.OPEN
+      }
+      trackTemp?.let { listener.onClick(it, type) }
     }
   }
 
@@ -60,7 +66,12 @@ class TrackAdapter(private val listener: Listener): ListAdapter<TrackItem, Track
   }
 
   interface Listener {
-    fun onClick(track: TrackItem)
+    fun onClick(track: TrackItem, type: ClickType)
+  }
+
+  enum class ClickType {
+    DELETE,
+    OPEN
   }
 
 }
