@@ -6,9 +6,68 @@
     android:layout_height="match_parent"
     tools:context=".screens.MainFragment">
 
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
-        android:id="@+id/tv1123"
+        android:id="@+id/tvTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TrackFragment" />
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:background="#98FFFFFF"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="Time: 00:00:00:000"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvAverage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="#98FFFFFF"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="Average velocity: 3.5 km/h"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="@+id/tvTime"
+        app:layout_constraintTop_toBottomOf="@+id/tvTime" />
+
+    <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="#98FFFFFF"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="date: 12/12/2022 13:00"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="@+id/tvTime"
+        app:layout_constraintTop_toBottomOf="@+id/tvAverage" />
+
+    <TextView
+        android:id="@+id/tvDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="#98FFFFFF"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="Distance: 16.5 km"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="@+id/tvTime"
+        app:layout_constraintTop_toBottomOf="@+id/tvDate" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

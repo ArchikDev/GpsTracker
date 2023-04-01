@@ -6,7 +6,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
-import android.widget.Toast
 import com.archik.gpstracker.R
 import com.archik.gpstracker.databinding.SaveDialogBinding
 import com.archik.gpstracker.db.TrackItem
@@ -39,7 +38,7 @@ object DialogManager {
 
     binding.apply {
       tvTime.text = "${item?.time} s"
-      tvSpeed.text = "${item?.velocity} km/h"
+      tvSpeed.text = "${item?.speed} km/h"
       tvDistance.text = "${item?.distance} km"
 
       bSave.setOnClickListener {

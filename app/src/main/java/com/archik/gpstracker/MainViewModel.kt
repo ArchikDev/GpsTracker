@@ -11,6 +11,7 @@ class MainViewModel(db: MainDb): ViewModel() {
   val dao = db.getDao()
   val timeDate = MutableLiveData<String>()
   val locationUpdates = MutableLiveData<LocationModel>()
+  val currentTrack = MutableLiveData<TrackItem>()
   val tracks = dao.getAllTracks().asLiveData()
 
   fun insertTrack(trackItem: TrackItem) = viewModelScope.launch {
