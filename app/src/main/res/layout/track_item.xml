@@ -81,7 +81,7 @@
             app:layout_constraintTop_toTopOf="@+id/ivTime" />
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/ibDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
